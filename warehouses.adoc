@@ -1,0 +1,171 @@
+= Warehouses
+
+Warehouses are the compute horses that does the processing of queries, running Machine Learning algorithms etc.,
+
+== Valid Sizes
+
+* X-Small
+* Small
+* Medium
+* Large
+* X-Large
+* 2X-Large
+* 3X-Large
+* 4X-Large
+* 5X-Large
+* 6X-Large
+
+Check https://docs.snowflake.com/en/user-guide/warehouses-overview[overview] for details on size and credits.
+
+== Create Warehouse
+
+Create warehouse requires only one parameter the **NAME** of the warehouse. 
+e.g. `CREATE WAREHOUSE #MY_FIRST_WAREHOUSE#`
+
+.Warehouse Default Properties
+[cols="1,2,1", stripes="odd"]
+|===
+|Property |Description |Default
+
+|WAREHOUSE_SIZE
+|The warehouse compute size.
+|X-small
+
+|WAREHOUSE_TYPE
+|The type of warehouse, `STANDARD` or `SNOWPARK-OPTIMIZED`.
+|STANDARD
+
+|MIN_CLUSTER_COUNT
+|Minimum number of servers to scale down to.
+|1
+
+|MIN_CLUSTER_COUNT
+|Maximum number of servers to scale out to.
+|1
+
+|MAX_CLUSTER_COUNT
+|Minimum number of servers to scale down to.
+|3
+
+|AUTO_SUSPEND
+|Idle number of **seconds** before suspending the warehouse.
+|300
+
+|AUTO_RESUME
+|On-demand start of the warehouse .
+|TRUE
+
+|INITIALLY_SUSPENDED
+|Start warehouse automatically after successful creation.
+|TRUE
+
+|===
+
+Check the https://docs.snowflake.com/en/sql-reference/sql/create-warehouse[docs] for more details on the parameters and other available options.
+
+Create Warehouse named `MY_FIRST_WAREHOUSE` with defaults:
+
+[source,sql]
+----
+CREATE WAREHOUSE MY_SMALL_WAREHOUSE;
+----
+
+Create Warehouse named `MY_SMALL_WAREHOUSE` with size as `Small`:
+
+[source,sql]
+----
+CREATE WAREHOUSE MY_SMALL_WAREHOUSE
+  WAREHOUSE_SIZE = 'Small';
+----
+
+Create Warehouse named `MY_SMALL_STARTED_WAREHOUSE` with size as `Small` and start it automatically after create:
+
+[source,sql]
+----
+CREATE WAREHOUSE MY_SMALL_STARTED_WAREHOUSE
+  WAREHOUSE_SIZE = 'Small'
+  INITIALLY_SUSPENDED = FALSE;
+----
+
+Create Warehouse named `MY_LONG_RUNNING_WAREHOUSE` with size as `Small` and make to automatically suspend after `10 mins(600 seconds)`:
+
+[source,sql]
+----
+CREATE WAREHOUSE MY_LONG_RUNNING_WAREHOUSE
+  WAREHOUSE_SIZE = 'Small'
+  AUTO_SUSPEND = 600;
+----
+
+
+[TIP]
+.RULE OF THUMB
+====
+- Use bigger Warehouse size for _CPU_ or _Memory_ intensive operations.
+- Adjust _MIN_CLUSTER_COUNT_ and _MAX_CLUSTER_COUNT_ to increase concurrency i.e. process more queries in parallel
+====
+
+== Check Warehouse Properties
+
+Check a particular warehouse properties
+
+[source,sql]
+----
+SHOW WAREHOUSES LIKE 'MY_SMALL_WAREHOUSE';
+----
+
+== List All Warehouses
+
+[source,sql]
+----
+SHOW WAREHOUSES;
+----
+
+== Working With Warehouse
+
+Use a particular warehouse
+
+[source,sql]
+----
+USE WAREHOUSE MY_SMALL_WAREHOUSE;
+----
+
+Manually start a warehouse,
+
+[source,sql]
+----
+ALTER WAREHOUSE MY_SMALL_WAREHOUSE RESUME;
+----
+
+Manually suspend a warehouse,
+
+[source,sql]
+----
+ALTER WAREHOUSE MY_SMALL_WAREHOUSE SUSPEND;
+----
+
+Change the size of the warehouse
+
+[source,sql]
+----
+ALTER WAREHOUSE MY_SMALL_WAREHOUSE
+  SET
+    WAREHOUSE_SIZE = 'Small'
+    WAIT_FOR_COMPLETION = TRUE; -- <1>
+----
+
+<1> `WAIT_FOR_COMPLETION` ensures all existing opertions are complete before modifying the size
+
+== Drop Warehouse
+
+[source,sql]
+----
+DROP WAREHOUSE MY_SMALL_WAREHOUSE;
+----
+
+[IMPORTANT]
+Warehouse's cant be `UNDROPPED`
+
+## References
+
+- https://docs.snowflake.com/en/user-guide/warehouses[Warehouses]
+- https://docs.snowflake.com/en/sql-reference/commands-warehouse[Warehouse SQL Commands Reference]
